@@ -1,6 +1,6 @@
-# CRiSp Shiny
+# CRiSp Shiny App
 
-Shiny app for City River Spaces (CRiSp)
+Shiny app for City River Spaces (CRiSp).
 
 ## Run the app locally
 
