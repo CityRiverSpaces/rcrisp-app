@@ -1,3 +1,4 @@
+library(bsicons)
 library(bslib)
 library(dplyr)
 library(leaflet)
@@ -12,54 +13,89 @@ ui <- page_sidebar(
   sidebar = sidebar(
     # City name as input
     textInput("city_name", label = "City name:", value = "city name"),
-    actionButton("city", "Fetch"),
+    actionButton("city", "Check"),
     # River name as input
     textInput("river_name", label = "River name:", value = "river name"),
-    actionButton("river", "Fetch"),
-    # Run corridor delineation
+    actionButton("river", "Check"),
+    # Other inputs for corridor delineation and segmentation
     numericInput(
       "max_corridor_width",
-      label = "Max corridor width (meter):",
+      label = "Max corridor width (meters):",
       value = 3000
     ),
-    actionButton("corridor", "Delineate Corridor"),
-    # Download output of delineation
-    downloadButton("download")
+    checkboxInput(
+      "valley",
+      label = tooltip(
+        trigger = list("valley", bs_icon("info-circle")),
+        "Use an estimate of the river valley as initial guess of the corridor.
+        If unchecked, use a fix buffer region around the river (provide initial
+        size).",
+        placement = "bottom"
+      ),
+      value = TRUE
+    ),
+    # Add a numericInput field only if the checkbox is unchecked
+    uiOutput("corridor_init_input"),
+    # Whether to run segmentation as well
+    checkboxInput("segments", value = TRUE),
+    # Action button to start delineation
+    actionButton("delineate", label = "Delineate"),
+    # When delineation is done, add download button
+    uiOutput("download_button")
   ),
   leafletOutput("outmap", height = 950)
 )
 
 server <- function(input, output, session) {
 
-  bb <- eventReactive(input$city, {
-    withProgress(message = "Fetching city bounding box", value = 1/3, {
-      get_osm_bb(input$city_name)
+  observeEvent(input$city, {
+    withProgress(message = "Fetching city bounding box", value = 1 / 3, {
+      bb <- get_osm_bb(input$city_name)
     })
+    polygon <- st_as_sfc(bb)
+    leafletProxy("outmap", session) |>
+      clearGroup("bbox") |>
+      addPolygons(data = polygon, color = "red", group = "bbox")
   })
 
-  river <- eventReactive(input$river, {
-    withProgress(message = "Fetching river geometry", value = 1/3, {
-      get_river(input$river_name)
+  observeEvent(input$river, {
+    withProgress(message = "Fetching river geometry", value = 1 / 3, {
+      river <- get_river(input$river_name)
     })
+    leafletProxy("outmap", session) |>
+      clearGroup("river") |>
+      addPolylines(data = river, color = "blue", group = "river")
   })
 
-  corridor <- eventReactive(input$corridor, {
-    bb <- bb()
-    river <- river()
+  output$corridor_init_input <- renderUI({
+    if (!input$valley) {
+      numericInput(
+        "corridor_init",
+        label = "Initial corridor width (meters):",
+        value = 1000
+      )
+    }
+  })
+
+  corridor <- eventReactive(input$delineate, {
+    city_name <- input$city_name
+    river_name <- input$river_name
     max_width <- input$max_corridor_width
     withProgress(message = "Setting up the delineation", value = 0, {
+      bb <- get_osm_bb(city_name)
+      river <- get_river(river_name)
       # Transform to projected CRS and determine area of interest
       crs <- get_utm_zone(bb)
       river <- st_transform(river, crs)
       bb <- st_transform(bb, crs)
       aoi <- get_aoi(river = river, bb = bb, buffer = max_width)
-      setProgress(1/4, message = "Fetching network data")
+      setProgress(1 / 4, message = "Fetching network data")
       streets <- get_osm_streets(st_transform(aoi, "EPSG:4326"), crs = crs)
       railways <- get_osm_railways(st_transform(aoi, "EPSG:4326"), crs = crs)
-      setProgress(2/4, message = "Building the network")
+      setProgress(2 / 4, message = "Building the network")
       network <- bind_rows(streets, railways) |>
         as_network()
-      setProgress(3/4, message = "Running the delineation")
+      setProgress(3 / 4, message = "Running the delineation")
       corridor <- delineate_corridor(network, river, max_width = max_width)
       # Return the corridor in lat/lon
       st_transform(corridor, "EPSG:4326")
@@ -71,25 +107,18 @@ server <- function(input, output, session) {
       addTiles()
   })
 
+  observeEvent(input$delineate, {
+    output$download_button <- renderUI({
+      downloadButton("download")
+    })
+  })
+
   output$download <- downloadHandler(
     filename = "corridor.gpkg",
     content = function(file) {
       st_write(corridor(), file, append = FALSE)
     }
   )
-
-  observe({
-    polygon <- st_as_sfc(bb())
-    leafletProxy("outmap", session) |>
-      clearGroup("bbox") |>
-      addPolygons(data = polygon, color = "red", group = "bbox")
-  })
-
-  observe({
-    leafletProxy("outmap", session) |>
-      clearGroup("river") |>
-      addPolylines(data = river(), color = "blue", group = "river")
-  })
 
   observe({
     leafletProxy("outmap", session) |>

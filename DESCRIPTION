@@ -1,4 +1,5 @@
 Imports:
+    bsicons,
     bslib,
     dplyr,
     leaflet,
