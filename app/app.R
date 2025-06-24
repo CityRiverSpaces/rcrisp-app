@@ -90,19 +90,28 @@ server <- function(input, output, session) {
       river <- st_transform(river, crs)
       bb <- st_transform(bb, crs)
       aoi <- get_aoi(river = river, bb = bb, buffer = max_width)
-      setProgress(1 / 5, message = "Fetching network data")
+      setProgress(1 / 7, message = "Fetching network data")
       streets <- get_osm_streets(st_transform(aoi, "EPSG:4326"), crs = crs)
       railways <- get_osm_railways(st_transform(aoi, "EPSG:4326"), crs = crs)
-      setProgress(2 / 5, message = "Building the network")
+      setProgress(2 / 7, message = "Building the network")
       network <- bind_rows(streets, railways) |>
         as_network()
-      setProgress(3 / 5, message = "Delineating the corridor")
-      corridor <- delineate_corridor(network, river, max_width = max_width)
+      setProgress(3 / 7, message = "Initializing the corridor")
+      if (input$valley) {
+        aoi_dem <- st_buffer(st_transform(aoi, "EPSG:4326"), 2500)
+        dem <- get_dem(aoi_dem, crs = crs)
+        corridor_init <- delineate_valley(dem, river)
+      } else {
+        corridor_init <- input$corridor_init
+      }
+      setProgress(4 / 7, message = "Delineating the corridor")
+      corridor <- delineate_corridor(network, river, max_width = max_width,
+                                     corridor_init = corridor_init)
       if (input$segments) {
-        setProgress(4 / 5, message = "Filtering the network")
+        setProgress(5 / 7, message = "Filtering the network")
         corridor_buffer <- st_buffer(corridor, 100)
         network_filtered <- filter_network(network, corridor_buffer)
-        setProgress(4 / 5, message = "Delineating the segments")
+        setProgress(6 / 7, message = "Delineating the segments")
         segments <- delineate_segments(corridor, network_filtered, river)
         # Return segments in lat/lon
         st_transform(segments, "EPSG:4326")
