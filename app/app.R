@@ -37,7 +37,7 @@ ui <- page_sidebar(
     # Add a numericInput field only if the checkbox is unchecked
     uiOutput("corridor_init_input"),
     # Whether to run segmentation as well
-    checkboxInput("segments", value = TRUE),
+    checkboxInput("segments", label = "segments", value = TRUE),
     # Action button to start delineation
     actionButton("delineate", label = "Delineate"),
     # When delineation is done, add download button
@@ -45,6 +45,7 @@ ui <- page_sidebar(
   ),
   leafletOutput("outmap", height = 950)
 )
+
 
 server <- function(input, output, session) {
 
@@ -89,16 +90,26 @@ server <- function(input, output, session) {
       river <- st_transform(river, crs)
       bb <- st_transform(bb, crs)
       aoi <- get_aoi(river = river, bb = bb, buffer = max_width)
-      setProgress(1 / 4, message = "Fetching network data")
+      setProgress(1 / 5, message = "Fetching network data")
       streets <- get_osm_streets(st_transform(aoi, "EPSG:4326"), crs = crs)
       railways <- get_osm_railways(st_transform(aoi, "EPSG:4326"), crs = crs)
-      setProgress(2 / 4, message = "Building the network")
+      setProgress(2 / 5, message = "Building the network")
       network <- bind_rows(streets, railways) |>
         as_network()
-      setProgress(3 / 4, message = "Running the delineation")
+      setProgress(3 / 5, message = "Delineating the corridor")
       corridor <- delineate_corridor(network, river, max_width = max_width)
-      # Return the corridor in lat/lon
-      st_transform(corridor, "EPSG:4326")
+      if (input$segments) {
+        setProgress(4 / 5, message = "Filtering the network")
+        corridor_buffer <- st_buffer(corridor, 100)
+        network_filtered <- filter_network(network, corridor_buffer)
+        setProgress(4 / 5, message = "Delineating the segments")
+        segments <- delineate_segments(corridor, network_filtered, river)
+        # Return segments in lat/lon
+        st_transform(segments, "EPSG:4326")
+      } else {
+        # Return the corridor in lat/lon
+        st_transform(corridor, "EPSG:4326")
+      }
     })
   })
 
@@ -152,6 +163,15 @@ get_aoi <- function(river, bb = NULL, buffer = NULL) {
   if (!is.null(bb)) river <- st_crop(river, bb)
   if (!is.null(buffer)) river <- st_buffer(river, buffer)
   river
+}
+
+filter_network <- function(network, target) {
+  network |>
+    tidygraph::activate("nodes") |>
+    tidygraph::filter(sfnetworks::node_intersects(target)) |>
+    # keep only the main connected component of the network
+    tidygraph::activate("nodes") |>
+    dplyr::filter(tidygraph::group_components() == 1)
 }
 
 shinyApp(ui = ui, server = server)
