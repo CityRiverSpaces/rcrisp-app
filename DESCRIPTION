@@ -6,6 +6,6 @@ Imports:
     osmdata,
     rcrisp,
     shiny,
-    sf
-Remotes:
-    github::CityRiverSpaces/rcrisp
+    sf,
+    sfnetworks,
+    tidygraph
