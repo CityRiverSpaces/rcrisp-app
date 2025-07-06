@@ -1,0 +1,52 @@
+name: deploy
+
+on:
+  # Manually trigger the Action under Actions/pkgcheck
+  workflow_dispatch:
+  # Run on every push to main
+  push:
+    paths:
+      - 'app.R'
+      - 'renv.lock'
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Install pandoc
+      uses: r-lib/actions/setup-pandoc@v2
+
+    - name: Install R
+      uses: r-lib/actions/setup-r@v2
+      with:
+        use-public-rspm: true
+
+    - name: Install R Dependencies
+      uses: r-lib/actions/setup-renv@v2
+
+    - name: Install rsconnect
+      shell: Rscript {0}
+      run: |
+        install.packages('rsconnect')
+
+    - name: Authenticate and deploy app
+      shell: Rscript {0}
+      env:
+        # set the shinyapps keys as environment variables
+        SHINYAPPS_USERNAME: ${{ secrets.SHINYAPPS_USERNAME }}
+        SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
+        SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
+      run: |
+        rsconnect::setAccountInfo(
+          name = Sys.getenv("SHINYAPPS_USERNAME"),
+          token = Sys.getenv("SHINYAPPS_TOKEN"),
+          secret = Sys.getenv("SHINYAPPS_SECRET")
+        )
+        rsconnect::deployApp(appname = 'CRiSp')
