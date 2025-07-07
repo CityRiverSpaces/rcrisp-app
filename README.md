@@ -1,6 +1,10 @@
-# rcrisp Shiny app
+# rcrisp shiny app
 
-This repository hosts the web app for the [`rcrisp`](https://github.com/CityRiverSpaces/rcrisp) repositoy, built using the [Shiny](https://shiny.posit.co/) framework.
+This repository hosts the code for the [Shiny](https://shiny.posit.co/) web app built for the [`rcrisp`](https://github.com/CityRiverSpaces/rcrisp) software package.
+
+## Deployment
+
+You can try out the app at the following URL: https://fnattino.shinyapps.io/rcrisp/
 
 ## Run the app locally
 
