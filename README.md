@@ -1,6 +1,6 @@
-# CRiSp Shiny App
+# rcrisp Shiny app
 
-This repository hosts the City River Spaces (CRiSp) web app, built using the [Shiny](https://shiny.posit.co/) framework. The app represents a graphical user interface (GUI) to [`rcrisp`](https://github.com/CityRiverSpaces/rcrisp).
+This repository hosts the web app for the [`rcrisp`](https://github.com/CityRiverSpaces/rcrisp) repositoy, built using the [Shiny](https://shiny.posit.co/) framework.
 
 ## Run the app locally
 
