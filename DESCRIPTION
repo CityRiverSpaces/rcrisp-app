@@ -1,20 +1,18 @@
-Package: CRiSpApp
-Title: City River Spaces Shiny App
+Package: rcrisp-app
+Title: Shiny app for rcrisp
 Version: 0.1.0
 Authors@R: c(
     person("Francesco", "Nattino", , "f.nattino@esciencecenter.nl", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0003-3286-0139")),
     person("Claudiu", "Forgaci", , "c.forgaci@tudelft.nl", role = "aut",
-           comment = c(ORCID = "0000-0003-3218-5102"))
-)
+           comment = c(ORCID = "0000-0003-3218-5102")),
+    person("Netherlands eScience Center", , , "info@esciencecenter.nl", role = "fnd")
+  )
 License: Apache License (>= 2)
-URL: https://github.com/CityRiverSpaces/CRiSpApp
-BugReports: https://github.com/CityRiverSpaces/CRiSpApp/issues
-Encoding: UTF-8
+URL: https://cityriverspaces.github.io/rcrisp-app/
+BugReports: https://github.com/CityRiverSpaces/rcrisp-app/issues
 Depends:
     R (>= 4.1.0)
-Suggests:
-    rsconnect
 Imports:
     bsicons,
     bslib,
@@ -26,3 +24,8 @@ Imports:
     sf,
     sfnetworks,
     tidygraph
+Suggests:
+    rsconnect
+Encoding: UTF-8
+LazyData: true
+
