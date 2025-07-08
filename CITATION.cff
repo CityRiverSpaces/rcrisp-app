@@ -1,0 +1,28 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: rcrisp Shiny app
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Francesco
+    family-names: Nattino
+    email: f.nattino@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0003-3286-0139'
+  - given-names: Claudiu
+    family-names: Forgaci
+    email: c.forgaci@tudelft.nl
+    orcid: 'https://orcid.org/0000-0003-3218-5102'
+    affiliation: Delft University of Technology
+repository-code: 'https://github.com/CityRiverSpaces/rcrisp-app'
+abstract: Shiny web app for the rcrisp software package.
+keywords:
+  - shiny
+  - webapp
+  - geospatial
+  - r
+license: Apache-2.0

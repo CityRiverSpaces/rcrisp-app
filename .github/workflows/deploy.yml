@@ -7,7 +7,7 @@ on:
   push:
     paths:
       - 'app.R'
-      - 'DESCRIPTION'
+      - 'renv.lock'
     branches:
       - main
 
