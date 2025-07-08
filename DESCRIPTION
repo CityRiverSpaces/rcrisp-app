@@ -9,7 +9,7 @@ Authors@R: c(
     person("Netherlands eScience Center", , , "info@esciencecenter.nl", role = "fnd")
   )
 License: Apache License (>= 2)
-URL: https://cityriverspaces.github.io/rcrisp-app/
+URL: https://cityriverspaces.github.io/rcrisp-app/, https://doi.org/10.5281/zenodo.15836850
 BugReports: https://github.com/CityRiverSpaces/rcrisp-app/issues
 Depends:
     R (>= 4.1.0)

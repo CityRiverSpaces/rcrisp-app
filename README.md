@@ -1,5 +1,7 @@
 # rcrisp shiny app
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15836850.svg)](https://doi.org/10.5281/zenodo.15836850)
+
 This repository hosts the code for the [Shiny](https://shiny.posit.co/) web app built for the [`rcrisp`](https://github.com/CityRiverSpaces/rcrisp) software package.
 
 You can try out the app at the following URL: https://cforgaci.shinyapps.io/rcrisp/
