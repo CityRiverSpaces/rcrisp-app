@@ -2,7 +2,7 @@
 
 This repository hosts the code for the [Shiny](https://shiny.posit.co/) web app built for the [`rcrisp`](https://github.com/CityRiverSpaces/rcrisp) software package.
 
-You can try out the app at the following URL: https://fnattino.shinyapps.io/rcrisp/
+You can try out the app at the following URL: https://cforgaci.shinyapps.io/rcrisp/
 
 ## Deploy the app on shinyapps.io
 
